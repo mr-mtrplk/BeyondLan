@@ -1,24 +1,36 @@
 import pygame, random, math
+from datetime import datetime, timedelta
 # todo: install package
 
+debug = False
+running = True
+
+# prep
 pygame.init()
 screen = pygame.display.set_mode((1080, 720))
 pygame.display.set_caption('Pizza Delivery')
 clock = pygame.time.Clock()
-running = True
 
-player = pygame.transform.scale(pygame.image.load("img/player.png"), (40, 40))
-player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() - screen.get_height() / 15)
-moving_speed = 6
+# icon
+player = pygame.transform.scale(pygame.image.load("img/player.png"), (100, 100))
+enemyMarker = pygame.transform.scale(pygame.image.load("img/enemy.png"), (80, 80))
 
+player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() - screen.get_height() / 10)
+
+DFont = pygame.font.SysFont("monospace", 15)
+
+enemy_rect = enemyMarker.get_rect()
+player_rect = player.get_rect()
+
+labels = []
 bullets = []
-shoot_delay = 0 #ticks
+enemies = []
+
+moving_speed = 6
+shoot_delay = 0 
 aftershoot_delay = 15
 bullet_speed = 10
-              
-enemyMarker = pygame.transform.scale(pygame.image.load("img/enemy.png"), (40,40))
-enemies = []
-max_enemies = 1
+max_enemies = 5
 spawn_delay = 200
 afterspawn_delay = 120
 
@@ -29,13 +41,23 @@ while running:
 
     # discplay
     screen.fill("black")
-    screen.blit(player, player_pos)
+    screen.blit(player, player_rect)
+    player_rect.center = player_pos
     
     for i in bullets:
         pygame.draw.circle(screen, 'white', i, 2)
 
     for i in enemies:
-        screen.blit(enemyMarker, i)
+        screen.blit(enemyMarker, enemy_rect)
+        enemy_rect.center = i['pos']
+    
+    for i in labels:
+        current_time = datetime.now()
+        if current_time > i['TTL']:
+            labels.remove(i)
+        label = DFont.render(i['label'], 1, (255,255,0))
+        i['pos'] += i['added']
+        screen.blit(label, i['pos'])
 
     # key press
     keys = pygame.key.get_pressed()
@@ -49,7 +71,7 @@ while running:
     
     if keys[pygame.K_SPACE]:
         if 0 >= shoot_delay: 
-            bullets.append(pygame.Vector2(player_pos.x, player_pos.y))
+            bullets.append(pygame.Vector2(player_pos.x, player_pos.y - 20))
             shoot_delay = aftershoot_delay
 
     # tick
@@ -64,22 +86,39 @@ while running:
         if 0 > i.y:
             bullets.remove(i)
 
-        #for j in enemies: 
-        #    hitbox_x = 100
-        #    hitbox_y = 100
-        #    pygame.draw.circle(screen, 'white', (j.x + hitbox_x, j.y + hitbox_y), 1)
-        #    pygame.draw.circle(screen, 'white', (j.x + hitbox_x, j.y - hitbox_y), 1)
-        #    pygame.draw.circle(screen, 'white', (j.x - hitbox_x, j.y + hitbox_y), 1)
-        #    pygame.draw.circle(screen, 'white', (j.x - hitbox_x, j.y - hitbox_y), 1)
-        #    
-        #    print(j.y - i.y, j.x - i.x)
-        #    if hitbox_y > j.y - i.y > -hitbox_y and hitbox_x > j.x - i.x > -hitbox_x:
-        #       
-        #       enemies.remove(j)
+        for j in enemies: 
+            hitbox = 40
+            if debug:
+                pygame.draw.circle(screen, 'white', (j.x + hitbox, j.y + hitbox), 1)
+                pygame.draw.circle(screen, 'white', (j.x + hitbox, j.y - hitbox), 1)
+                pygame.draw.circle(screen, 'white', (j.x - hitbox, j.y + hitbox), 1)
+                pygame.draw.circle(screen, 'white', (j.x - hitbox, j.y - hitbox), 1)
+            
+            if hitbox > j['pos'].y - i.y > -hitbox and hitbox > j['pos'].x - i.x > -hitbox:
+                bullets.remove(i)
+                if random.randint(1, 20) == 1: 
+                   damage = random.randint(1, 20)
+                else:
+                    damage = random.randint(20, 80)
+                j['health'] -= damage
+                labels.append({
+                    'pos': pygame.Vector2(j['pos'].x, j['pos'].y), 
+                    'label': str(damage), 
+                    'TTL': datetime.now() + timedelta(seconds=2),
+                    'added': pygame.Vector2(random.randint(-3,3), random.randint(-3,3))
+                })
+
+                if 0 >= j['health']:
+                    enemies.remove(j)
+                    
     
     if 0 >= spawn_delay and max_enemies > len(enemies):
-        if 1 == random.randint(1, 1):
-            enemies.append(pygame.Vector2(random.randint(0, screen.get_width()),random.randint(0, round(screen.get_height()/3))))
+        if 1 == random.randint(1, 100):
+            enemies.append({
+                'pos': pygame.Vector2(random.randint(20, screen.get_width()-20),
+                                      random.randint(20, round(screen.get_height()/3)-20)),
+                'health': 250
+            })
             spawn_delay = afterspawn_delay
 
     pygame.display.flip()
