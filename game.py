@@ -28,7 +28,7 @@ enemies = []
 
 moving_speed = 6
 shoot_delay = 0 
-aftershoot_delay = 15
+aftershoot_delay = 1
 bullet_speed = 10
 max_enemies = 5
 spawn_delay = 200
@@ -83,7 +83,7 @@ while running:
     for i in bullets:
         i.y -= bullet_speed
         
-        if 0 > i.y:
+        if -2 > i.y:
             bullets.remove(i)
 
         for j in enemies: 
@@ -94,7 +94,7 @@ while running:
                 pygame.draw.circle(screen, 'white', (j.x - hitbox, j.y + hitbox), 1)
                 pygame.draw.circle(screen, 'white', (j.x - hitbox, j.y - hitbox), 1)
             
-            if hitbox > j['pos'].y - i.y > -hitbox and hitbox > j['pos'].x - i.x > -hitbox:
+            if hitbox > j['pos'].y - i.y > -hitbox and hitbox > j['pos'].x - i.x > -hitbox and i in bullets:
                 bullets.remove(i)
                 if random.randint(1, 20) == 1: 
                    damage = random.randint(1, 20)
@@ -107,10 +107,9 @@ while running:
                     'TTL': datetime.now() + timedelta(seconds=2),
                     'added': pygame.Vector2(random.randint(-3,3), random.randint(-3,3))
                 })
-
+                
                 if 0 >= j['health']:
-                    if enemies.index(j):
-                        enemies.remove(j)
+                    enemies.remove(j)
                     
     
     if 0 >= spawn_delay and max_enemies > len(enemies):
