@@ -109,7 +109,8 @@ while running:
                 })
 
                 if 0 >= j['health']:
-                    enemies.remove(j)
+                    if enemies.index(j):
+                        enemies.remove(j)
                     
     
     if 0 >= spawn_delay and max_enemies > len(enemies):
