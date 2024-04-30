@@ -1,7 +1,7 @@
 import pygame, random, math
 from datetime import datetime, timedelta
 # todo: install package
-game = False
+game = "roadrage"
 running = True
 
 debug = False
@@ -14,39 +14,47 @@ pygame.display.set_caption('Pizza Delivery')
 clock = pygame.time.Clock()
 
 class roadrage:
-  def __init__(self):
+    def __init__(self):
       
-    # icon
-    self.player = pygame.transform.scale(pygame.image.load("img/player.png"), (100, 100))
-    self.enemyMarker = pygame.transform.scale(pygame.image.load("img/enemy.png"), (80, 80))
-    self.player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() - screen.get_height() / 10)
-    self.DFont = pygame.font.SysFont("monospace", 15)
-    self.enemy_rect = self.enemyMarker.get_rect()
-    self.player_rect = self.player.get_rect()
+        # icon
+        self.player = pygame.transform.scale(pygame.image.load("img/player.png"), (100, 100))
+        self.enemyMarker = pygame.transform.scale(pygame.image.load("img/enemy.png"), (80, 80))
+        self.bg = pygame.image.load("img/bg-road.png")
 
-    self.labels = []
-    self.bullets = []
-    self.enemies = []
+        self.bg_pos = pygame.Vector2(0, 0)
+        self.player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() - screen.get_height() / 10)
 
-    # CFG
-    self.moving_speed = 4
-    self.shoot_delay = 0 
-    self.aftershoot_delay = 10
-    self.bullet_speed = 75
-    self.max_enemies = 5
-    self.spawn_delay = 200
-    self.afterspawn_delay = 120
+        self.bg_rect = self.bg.get_rect()
+        self.enemy_rect = self.enemyMarker.get_rect()
+        self.player_rect = self.player.get_rect()
 
-    def main_loop():
+        self.DFont = pygame.font.SysFont("monospace", 15)
+
+        self.labels = []
+        self.bullets = []
+        self.enemies = []
+
+        # CFG
+        self.moving_speed = 4
+        self.shoot_delay = 0 
+        self.aftershoot_delay = 10
+        self.bullet_speed = 75
+        self.max_enemies = 5
+        self.spawn_delay = 200
+        self.afterspawn_delay = 120
+
+    def main_loop(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
         # discplay
         screen.fill("black")
+        screen.blit(self.bg, self.bg_pos)
+        self.bg_rect.center = self.bg_pos
         screen.blit(self.player, self.player_rect)
         self.player_rect.center = self.player_pos
-
+        
         for i in self.bullets:
             pygame.draw.circle(screen, 'white', i, 2)
 
@@ -58,6 +66,7 @@ class roadrage:
             current_time = datetime.now()
             if current_time > i['TTL']:
                 self.labels.remove(i)
+
             label = self.DFont.render(i['label'], 1, (255,255,0))
             i['pos'] += i['added']
             screen.blit(label, i['pos'])
@@ -73,15 +82,15 @@ class roadrage:
                 self.player_pos.x += self.moving_speed
 
         if keys[pygame.K_SPACE]:
-            if 0 >= shoot_delay: 
+            if 0 >= self.shoot_delay: 
                 self.bullets.append(pygame.Vector2(self.player_pos.x, self.player_pos.y - 20))
-                shoot_delay = self.aftershoot_delay
+                self.shoot_delay = self.aftershoot_delay
 
         # tick
-        if shoot_delay > 0:
-            shoot_delay -= 1
-        if spawn_delay > 0:
-            spawn_delay -= 1
+        if self.shoot_delay > 0:
+            self.shoot_delay -= 1
+        if self.spawn_delay > 0:
+            self.spawn_delay -= 1
 
         for i in self.bullets:
             i.y -= self.bullet_speed
@@ -114,22 +123,30 @@ class roadrage:
                     if 0 >= j['health']:
                         self.enemies.remove(j)
 
-
-        if 0 >= spawn_delay and self.max_enemies > len(self.enemies):
+        if 0 >= self.spawn_delay and self.max_enemies > len(self.enemies):
             if 1 == random.randint(1, 100):
                 self.enemies.append({
                     'pos': pygame.Vector2(random.randint(20, screen.get_width()-20),
                                           random.randint(20, round(screen.get_height()/3)-20)),
                     'health': 250
                 })
-                spawn_delay = self.afterspawn_delay
+                self.spawn_delay = self.afterspawn_delay
 
         pygame.display.flip()
         clock.tick(100)
 
+class story():
+    def __init__(self):
+        print("story")
+
+RRGame = False
 while running:
-    if not RRGame: 
-        RRGame = roadrage()
-    RRGame.main_loop()
+    if game == False: 
+        game = "story" 
+
+    if game == "roadrage":
+        if not RRGame:
+            RRGame = roadrage()
+        RRGame.main_loop()
 
 pygame.quit()
