@@ -3,9 +3,7 @@ from datetime import datetime, timedelta
 # todo: install package
 game = "roadrage"
 running = True
-
 debug = False
-
 
 # init
 pygame.init()
@@ -25,14 +23,15 @@ class roadrage:
         self.enemy_rect = self.enemyMarker.get_rect()
         self.player_rect = self.player.get_rect()
 
-        self.bg_pos, self.labels, self.bullets, self.enemies = [], [], [], []
+        self.bg_pos, self.labels, self.bullets, self.enemies, self.bgmax_pos = [], [], [], [], []
         self.bg_pos.append(pygame.Vector2(screen.get_width() / 2, 120)) # TODO: better representation of "the bottom of the image"
         self.player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
-        print(self.bg.get_rect())
+
 
 
         self.Dbgpos = self.bg_pos[0].y 
         self.CBG = 0
+        self.bgmax_pos.append(self.Dbgpos + self.bg_rect.y)
 
         # CFG
         self.DFont = pygame.font.SysFont("monospace", 15)
@@ -130,15 +129,21 @@ class roadrage:
                     'health': 250
                 })
                 self.spawn_delay = self.afterspawn_delay
-                
+        if self.CBG > 2:
+            self.bg_pos.remove(self.bg_pos[0])
+            self.bgmax_pos.remove(self.bgmax_pos[0])
+            self.CBG -= 1
         for i in self.bg_pos:
-            i.y += 1
-
-        print(self.bg_pos[self.CBG].y, self.Dbgpos + self.bg_rect.y)
-        if self.bg_pos[self.CBG].y > self.Dbgpos + self.bg_rect.y:
+            i.y += 5
+    
+        if self.bg_pos[self.CBG].y > self.bgmax_pos[self.CBG]:
+            if debug:
+                print(self.bg_pos[self.CBG].y, self.bgmax_pos[self.CBG])
+                print(self.Dbgpos, self.bg_rect.y, self.Dbgpos - self.bg_rect.y)
+                print("added map snippet")
             self.bg_pos.append(pygame.Vector2(screen.get_width() / 2, self.bg_rect.y))
+            self.bgmax_pos.append(self.bgmax_pos[self.CBG] - self.bg_rect.y)
             self.CBG += 1
-            print("added map snippet")
 
         pygame.display.flip()
         clock.tick(100)
