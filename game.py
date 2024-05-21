@@ -129,10 +129,12 @@ class roadrage:
                     'health': 250
                 })
                 self.spawn_delay = self.afterspawn_delay
+                
         if self.CBG > 2:
             self.bg_pos.remove(self.bg_pos[0])
             self.bgmax_pos.remove(self.bgmax_pos[0])
             self.CBG -= 1
+
         for i in self.bg_pos:
             i.y += 5
     
