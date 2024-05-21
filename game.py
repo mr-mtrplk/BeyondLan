@@ -20,21 +20,22 @@ class roadrage:
         self.player = pygame.transform.scale(pygame.image.load("img/player.png"), (100, 100))
         self.enemyMarker = pygame.transform.scale(pygame.image.load("img/enemy.png"), (80, 80))
         self.bg = pygame.image.load("img/bg-road.png")
-
-        self.bg_pos = pygame.Vector2(0, 0)
-        self.player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() - screen.get_height() / 10)
-
+        
         self.bg_rect = self.bg.get_rect()
         self.enemy_rect = self.enemyMarker.get_rect()
         self.player_rect = self.player.get_rect()
 
-        self.DFont = pygame.font.SysFont("monospace", 15)
+        self.bg_pos, self.labels, self.bullets, self.enemies = [], [], [], []
+        self.bg_pos.append(pygame.Vector2(screen.get_width() / 2, 120)) # TODO: better representation of "the bottom of the image"
+        self.player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
+        print(self.bg.get_rect())
 
-        self.labels = []
-        self.bullets = []
-        self.enemies = []
+
+        self.Dbgpos = self.bg_pos[0].y 
+        self.CBG = 0
 
         # CFG
+        self.DFont = pygame.font.SysFont("monospace", 15)
         self.moving_speed = 4
         self.shoot_delay = 0 
         self.aftershoot_delay = 10
@@ -44,14 +45,12 @@ class roadrage:
         self.afterspawn_delay = 120
 
     def main_loop(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-
-        # discplay
+        # display
         screen.fill("black")
-        screen.blit(self.bg, self.bg_pos)
-        self.bg_rect.center = self.bg_pos
+        for i, d in enumerate(self.bg_pos):
+            screen.blit(self.bg, self.bg_rect)
+            self.bg_rect.center = d
+
         screen.blit(self.player, self.player_rect)
         self.player_rect.center = self.player_pos
         
@@ -131,6 +130,15 @@ class roadrage:
                     'health': 250
                 })
                 self.spawn_delay = self.afterspawn_delay
+                
+        for i in self.bg_pos:
+            i.y += 1
+
+        print(self.bg_pos[self.CBG].y, self.Dbgpos + self.bg_rect.y)
+        if self.bg_pos[self.CBG].y > self.Dbgpos + self.bg_rect.y:
+            self.bg_pos.append(pygame.Vector2(screen.get_width() / 2, self.bg_rect.y))
+            self.CBG += 1
+            print("added map snippet")
 
         pygame.display.flip()
         clock.tick(100)
@@ -141,8 +149,12 @@ class story():
 
 RRGame = False
 while running:
-    if game == False: 
-        game = "story" 
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    #if game == False: 
+    #    game = "story" 
 
     if game == "roadrage":
         if not RRGame:
