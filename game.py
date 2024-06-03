@@ -11,13 +11,16 @@ screen = pygame.display.set_mode((1080, 720))
 pygame.display.set_caption('Pizza Delivery')
 clock = pygame.time.Clock()
 
+# TODO: enemy shooting
 class roadrage:
     def __init__(self):
       
         # icon
         self.player = pygame.transform.scale(pygame.image.load("img/player.png"), (100, 100))
         self.enemyMarker = pygame.transform.scale(pygame.image.load("img/enemy.png"), (80, 80))
-        self.bg = pygame.image.load("img/bg-road.png")
+        self.bg = pygame.image.load("img/bg_city.png")
+
+        # TODO: random map
         
         self.bg_rect = self.bg.get_rect()
         self.enemy_rect = self.enemyMarker.get_rect()
@@ -27,9 +30,7 @@ class roadrage:
         self.bg_pos.append(pygame.Vector2(screen.get_width() / 2, 120)) # TODO: better representation of "the bottom of the image"
         self.player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
 
-
-
-        self.Dbgpos = self.bg_pos[0].y 
+        self.Dbgpos = self.bg_pos[0].y
         self.CBG = 0
         self.bgmax_pos.append(self.Dbgpos + self.bg_rect.y)
 
@@ -119,6 +120,7 @@ class roadrage:
                     })
 
                     if 0 >= j['health']:
+                        # TODO: explosion
                         self.enemies.remove(j)
 
         if 0 >= self.spawn_delay and self.max_enemies > len(self.enemies):
@@ -154,14 +156,23 @@ class story():
     def __init__(self):
         print("story")
 
-RRGame = False
+    def main_loop(self):
+        # TODO: STORY
+        print('work in progresses')
+
+RRGame, SGame = False, False
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-    #if game == False: 
-    #    game = "story" 
+    if game == False: 
+        game = "story" 
+
+    if game == "story":
+        if not SGame:
+            SGame = roadrage()
+        SGame.main_loop()
 
     if game == "roadrage":
         if not RRGame:
